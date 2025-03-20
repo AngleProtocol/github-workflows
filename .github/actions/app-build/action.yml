@@ -19,12 +19,6 @@ runs:
   using: 'composite'
   steps:
 
-    # Checkout with submodules
-    - uses: AngleProtocol/github-workflows/.github/actions/checkout-dependencies@main
-      with:
-        submodules: recursive
-        token: ${{ inputs.token }}
-
     # Authenticate with Google Cloud
     - uses: 'google-github-actions/auth@v0'
       with:
