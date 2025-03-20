@@ -1,13 +1,10 @@
 name: 'Build Image and Trigger Staging Deployment'
 description: 'A reusable action to build a Docker image and trigger a staging deployment.'
 branding:
-  icon: 'cloud-upload'
-  color: 'blue'
+  icon: 'package'
+  color: 'orange'
 
 inputs:
-  app:
-    description: 'The name of the app'
-    required: true
   token:
     description: 'The GitHub token to use for checkout.'
     required: true
@@ -56,30 +53,4 @@ runs:
     # Install dependencies for deployment
     - name: Install dependencies
       run: sudo snap install yq
-      shell: bash
-
-    # Clone deployments repo
-    - name: Clone deployments repo
-      uses: actions/checkout@v3
-      with:
-        repository: AngleProtocol/deployments
-        token: ${{ inputs.token }}
-        path: deployments
-
-    # Modify config.staging.yaml and push to deployments
-    - name: Modify config.staging.yaml and push to deployments
-      run: |
-        cd deployments
-
-        export SHORT_SHA=${GITHUB_SHA:0:7}
-
-        yq -i '.${{ inputs.app }}.version = strenv(SHORT_SHA)' ./config.staging.yaml
-
-        git config --global user.email "baptiste@angle.money"
-        git config --global user.name "BaptistG"
-
-        git add ./config.staging.yaml
-        git commit -m "Update config.staging.yaml with ${{ inputs.app }} version $SHORT_SHA"
-
-        git push
       shell: bash
