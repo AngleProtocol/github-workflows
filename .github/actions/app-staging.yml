@@ -1,0 +1,85 @@
+name: 'Build Image and Trigger Staging Deployment'
+description: 'A reusable action to build a Docker image and trigger a staging deployment.'
+branding:
+  icon: 'cloud-upload'
+  color: 'blue'
+
+inputs:
+  app:
+    description: 'The name of the app'
+    required: true
+  token:
+    description: 'The GitHub token to use for checkout.'
+    required: true
+  image-url:
+    description: 'The URL of the Docker image.'
+    required: true
+  gcloud-credentials:
+    description: 'The Google Cloud credentials JSON.'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+
+    # Checkout with submodules
+    - uses: ./.github/actions/checkout-dependencies.yml
+      with:
+        submodules: recursive
+        token: ${{ inputs.token }}
+
+    # Authenticate with Google Cloud
+    - uses: 'google-github-actions/auth@v0'
+      with:
+        credentials_json: ${{ inputs.gcloud-credentials }}
+
+    # Login to Docker
+    - name: Login to Docker
+      run: gcloud auth configure-docker europe-west1-docker.pkg.dev
+      shell: bash
+
+    # Build image
+    - name: Build image
+      run: |
+        export SHORT_SHA=${GITHUB_SHA:0:7}
+        docker pull ${{ inputs.image-url }}:latest || true
+        docker build -v ./node_modules:/app/node_modules --cache-from ${{ inputs.image-url }}:latest --tag ${{ inputs.image-url }}:$SHORT_SHA --tag ${{ inputs.image-url }}:latest .
+      shell: bash
+
+    # Push image
+    - name: Push image
+      run: |
+        export SHORT_SHA=${GITHUB_SHA:0:7}
+        docker push ${{ inputs.image-url }}:$SHORT_SHA
+      shell: bash
+
+    # Install dependencies for deployment
+    - name: Install dependencies
+      run: sudo snap install yq
+      shell: bash
+
+    # Clone deployments repo
+    - name: Clone deployments repo
+      uses: actions/checkout@v3
+      with:
+        repository: AngleProtocol/deployments
+        token: ${{ inputs.token }}
+        path: deployments
+
+    # Modify config.staging.yaml and push to deployments
+    - name: Modify config.staging.yaml and push to deployments
+      run: |
+        cd deployments
+
+        export SHORT_SHA=${GITHUB_SHA:0:7}
+
+        yq -i '.${{ inputs.app }}.version = strenv(SHORT_SHA)' ./config.staging.yaml
+
+        git config --global user.email "baptiste@angle.money"
+        git config --global user.name "BaptistG"
+
+        git add ./config.staging.yaml
+        git commit -m "Update config.staging.yaml with ${{ inputs.app }} version $SHORT_SHA"
+
+        git push
+      shell: bash

@@ -1,0 +1,48 @@
+name: 'Checkout w/ Dependencies'
+description: 'Checkout repository and submodules, installs and caches dependencies using bun'
+branding:
+  icon: 'download'
+  color: 'yellow'
+inputs:
+  token:
+    description: 'The GitHub token to use for checkout.'
+    required: true
+  bun-version:
+    description: 'The version of Bun to use.'
+    required: false
+    default: 'latest'
+  bun-cache:
+    description: 'Whether to use cached node_modules'
+    required: false
+    default: true
+
+runs:
+  using: 'composite'
+  steps:
+
+    # Checkout with submodules
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        token: ${{ inputs.token }}
+
+    # Set up Bun
+    - name: Set up Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: ${{ inputs.bun-version }}
+
+    # Cache for dependencies
+    - name: Check dependencies cache
+      id: cache-dependencies
+      if: ${{ inputs.bun-cache == 'true' }}
+      uses: actions/cache@v4
+      with:
+        path: node_modules
+        key: ${{ hashFiles('**/bun.lockb', '**/package.json') }}-dependencies
+
+    # Install dependencies if not cached or if caching is disabled
+    - name: Install dependencies
+      if: ${{ steps.cache-dependencies.outputs.cache-hit != 'true' || inputs.bun-cache != 'true' }}
+      run: bun install
+      shell: bash
