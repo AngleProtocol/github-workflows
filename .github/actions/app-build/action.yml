@@ -20,7 +20,7 @@ runs:
   steps:
 
     # Checkout with submodules
-    - uses: ./.github/actions/checkout-dependencies.yml
+    - uses: ./.github/actions/checkout-dependencies
       with:
         submodules: recursive
         token: ${{ inputs.token }}
