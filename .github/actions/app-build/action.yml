@@ -20,7 +20,7 @@ runs:
   steps:
 
     # Checkout with submodules
-    - uses: ./.github/actions/checkout-dependencies
+    - uses: AngleProtocol/github-workflows/.github/actions/checkout-dependencies@main
       with:
         submodules: recursive
         token: ${{ inputs.token }}
