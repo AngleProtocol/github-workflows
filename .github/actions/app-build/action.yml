@@ -40,7 +40,7 @@ runs:
       run: |
         export SHORT_SHA=${GITHUB_SHA:0:7}
         docker pull ${{ inputs.image-url }}:latest || true
-        docker buildx build --mount type=bind,source=./node_modules,target=/app/node_modules --cache-from ${{ inputs.image-url }}:latest --tag ${{ inputs.image-url }}:$SHORT_SHA --tag ${{ inputs.image-url }}:latest .
+        docker build --build-arg INCLUDE_NODE_MODULES=true --cache-from ${{ inputs.image-url }}:latest --tag ${{ inputs.image-url }}:$SHORT_SHA --tag ${{ inputs.image-url }}:latest .
       shell: bash
 
     # Push image
