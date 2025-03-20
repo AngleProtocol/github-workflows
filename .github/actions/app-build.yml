@@ -49,8 +49,3 @@ runs:
         export SHORT_SHA=${GITHUB_SHA:0:7}
         docker push ${{ inputs.image-url }}:$SHORT_SHA
       shell: bash
-
-    # Install dependencies for deployment
-    - name: Install dependencies
-      run: sudo snap install yq
-      shell: bash
