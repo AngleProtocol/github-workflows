@@ -29,7 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Build Image with Composite Action
-        uses: AngleProtocol/github-workflows/.github/actions/app-build.yml@main
+        uses: ./.github/actions/app-build.yml@main
         with:
           app: ${{ inputs.app }}
           token: ${{ secrets.GITHUB_TOKEN }}
