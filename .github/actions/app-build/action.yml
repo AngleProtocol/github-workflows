@@ -34,7 +34,7 @@ runs:
       run: |
         export SHORT_SHA=${GITHUB_SHA:0:7}
         docker pull ${{ inputs.image-url }}:latest || true
-        docker build --cache-from ${{ inputs.image-url }}:latest --tag ${{ inputs.image-url }}:$SHORT_SHA --tag ${{ inputs.image-url }}:latest .
+        docker build --cache-from ${{ inputs.image-url }}:latest --tag ${{ inputs.image-url }}:$SHORT_SHA --tag ${{ inputs.image-url }} .
       shell: bash
 
     # Push image
