@@ -17,11 +17,8 @@ on:
         required: true
         type: string
         description: 'The Google Cloud credentials JSON.'
-
-    secrets:
-      GITHUB_TOKEN:
-        required: true
-      GCLOUD_CREDENTIALS:
+      token:
+        description: 'The GitHub token to use for checkout.'
         required: true
 
 jobs:
@@ -32,9 +29,6 @@ jobs:
         uses: ./.github/actions/app-build.yml@main
         with:
           app: ${{ inputs.app }}
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ inputs.token }}
           image-url: ${{ inputs.image-url }}
           gcloud-credentials: ${{ inputs.gcloud-credentials }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GCLOUD_CREDENTIALS: ${{ secrets.GCLOUD_CREDENTIALS }}
