@@ -33,7 +33,6 @@ runs:
     # Login to Docker
     - name: Login to Docker
       run: gcloud auth configure-docker europe-west1-docker.pkg.dev
-      shell: bash
 
     # Build image
     - name: Build image
@@ -42,11 +41,9 @@ runs:
         docker pull ${{ inputs.image-url }} || true
         docker build --cache-from ${{ inputs.image-url }}:latest --tag ${{ inputs.image-url }}:$SHORT_SHA .
         docker image tag ${{ inputs.image-url }}:$SHORT_SHA ${{ inputs.image-url }}:latest
-      shell: bash
 
     # Push image
     - name: Push image
       run: |
         export SHORT_SHA=${GITHUB_SHA:0:7}
         docker push ${{ inputs.image-url }}:$SHORT_SHA
-      shell: bash
