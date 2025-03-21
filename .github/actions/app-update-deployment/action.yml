@@ -23,7 +23,6 @@ inputs:
 
 runs:
   using: 'composite'
-  needs: tag-image
   steps:
 
     - name: Install dependencies
