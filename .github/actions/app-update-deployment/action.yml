@@ -26,6 +26,7 @@ runs:
   steps:
 
     - name: Install dependencies
+      shell: bash
       run: |
         sudo snap install yq
 
@@ -37,6 +38,7 @@ runs:
         path: deployments
 
     - name: Modify ${{ inputs.config-file }} and push to deployments
+      shell: bash
       run: |
         cd deployments
 
