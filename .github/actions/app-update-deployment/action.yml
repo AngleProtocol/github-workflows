@@ -40,7 +40,7 @@ runs:
       run: |
         cd deployments
 
-        export VERSION=${GITHUB_REF#refs/tags/}
+        export VERSION=${{ inputs.version }}
         yq -i '.${{ inputs.app-name }}.version = strenv(VERSION)' ./${{ inputs.config-file }}
 
         git config --global user.email "baptiste@angle.money"
