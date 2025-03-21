@@ -1,0 +1,53 @@
+name: 'Update Deployment'
+description: 'A reusable action to build a Docker image and trigger a staging deployment.'
+branding:
+  icon: 'package'
+  color: 'orange'
+
+inputs:
+  token:
+    description: 'The GitHub token to use for checkout.'
+    required: true
+  config-file:
+    description: 'The URL of the Docker image.'
+    required: true
+    default: "config.production.yaml"
+  app-name:
+    description: 'Name of the app being updated'
+    required: true
+    default: "config.production.yaml"
+  version: 
+    description: 'Version of the image to push'
+    required: true
+    default: "${GITHUB_SHA:0:7}"
+
+runs:
+  using: 'composite'
+  needs: tag-image
+  steps:
+
+    - name: Install dependencies
+      run: |
+        sudo snap install yq
+
+    - name: Clone deployments repo
+      uses: actions/checkout@v3
+      with:
+        repository: AngleProtocol/deployments
+        token: ${{ secrets.ACCESS_TOKEN }}
+        path: deployments
+
+    - name: Modify ${{ inputs.config-file }} and push to deployments
+      run: |
+        cd deployments
+
+        export VERSION=${GITHUB_REF#refs/tags/}
+        yq -i '.${{ inputs.app-name }}.version = strenv(VERSION)' ./${{ inputs.config-file }}
+
+        git config --global user.email "baptiste@angle.money"
+        git config --global user.name "BaptistG"
+
+        git add ./${{ inputs.config-file }}
+        git commit -m "Update ${{ inputs.config-file }} with ${{ inputs.app-name }} version $VERSION"
+
+        git push
